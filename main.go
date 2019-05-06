@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/aykevl/go-llvm"
 	"log"
 	"os"
+
+	"github.com/aykevl/go-llvm"
 )
 
 func main() {
