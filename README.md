@@ -94,12 +94,8 @@ main:                                   # @main
 
 ## Compiling the bitcode to WebAssembly
 
-Using clang to generate WebAssembly seems like it works,
-though even with `-Os` the resulting file seems to have
-several text strings included.
-
-Unsure yet if this is really a valid wasm file, and if those
-text strings could be omitted or reduced.
+Using clang to generate WebAssembly works, with the resulting wasm
+able to be processed by [wabt](https://github.com/WebAssembly/wabt).
 
 ```
 $ clang --compile -Os --target=wasm32-unknown-unknown-wasm -o goir1.wasm goir1.bc
@@ -113,18 +109,49 @@ $ ls -la goir1.wasm
 ```
 
 ```
-$ hexdump -C goir1.wasm
-00000000  00 61 73 6d 01 00 00 00  01 8b 80 80 80 00 02 60  |.asm...........`|
-00000010  00 01 7f 60 02 7f 7f 01  7f 02 ba 80 80 80 00 02  |...`............|
-00000020  03 65 6e 76 0f 5f 5f 6c  69 6e 65 61 72 5f 6d 65  |.env.__linear_me|
-00000030  6d 6f 72 79 02 00 00 03  65 6e 76 19 5f 5f 69 6e  |mory....env.__in|
-00000040  64 69 72 65 63 74 5f 66  75 6e 63 74 69 6f 6e 5f  |direct_function_|
-00000050  74 61 62 6c 65 01 70 00  00 03 83 80 80 80 00 02  |table.p.........|
-00000060  00 01 0a 8f 80 80 80 00  02 04 00 41 30 0b 08 00  |...........A0...|
-00000070  10 80 80 80 80 00 0b 00  ab 80 80 80 00 07 6c 69  |..............li|
-00000080  6e 6b 69 6e 67 02 08 9c  80 80 80 00 02 00 00 00  |nking...........|
-00000090  0f 5f 5f 6f 72 69 67 69  6e 61 6c 5f 6d 61 69 6e  |.__original_main|
-000000a0  00 00 01 04 6d 61 69 6e  00 90 80 80 80 00 0a 72  |....main.......r|
-000000b0  65 6c 6f 63 2e 43 4f 44  45 03 01 00 09 00        |eloc.CODE.....|
-000000be
+$ wasm2wat --generate-names goir1.wasm
+(module
+  (type $t0 (func (result i32)))
+  (type $t1 (func (param i32 i32) (result i32)))
+  (import "env" "__linear_memory" (memory $env.__linear_memory 0))
+  (import "env" "__indirect_function_table" (table $env.__indirect_function_table 0 funcref))
+  (import "env" "__stack_pointer" (global $env.__stack_pointer (mut i32)))
+  (func $f0 (type $t0) (result i32)
+    (local $l0 i32) (local $l1 i32) (local $l2 i32) (local $l3 i32) (local $l4 i32) (local $l5 i32) (local $l6 i32) (local $l7 i32)
+    global.get $env.__stack_pointer
+    local.set $l0
+    i32.const 16
+    local.set $l1
+    local.get $l0
+    local.get $l1
+    i32.sub
+    local.set $l2
+    i32.const 16
+    local.set $l3
+    i32.const 32
+    local.set $l4
+    local.get $l2
+    local.get $l4
+    i32.store offset=12
+    local.get $l2
+    local.get $l3
+    i32.store offset=8
+    local.get $l2
+    i32.load offset=12
+    local.set $l5
+    local.get $l2
+    i32.load offset=8
+    local.set $l6
+    local.get $l5
+    local.get $l6
+    i32.add
+    local.set $l7
+    local.get $l7
+    return)
+  (func $f1 (type $t1) (param $p0 i32) (param $p1 i32) (result i32)
+    (local $l2 i32)
+    call $f0
+    local.set $l2
+    local.get $l2
+    return))
 ```
