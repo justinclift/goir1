@@ -5,8 +5,10 @@ generating LLVM IR from Go, just for learning purposes.
 
 When this runs, it generates an LLVM IR bitcode file `goir1.bc`.
 
-To convert that to a text representation, `llvm-link -S` seems
-to work ok:
+## Displaying the text representation of IR
+
+To convert LLVM bitcode to a text representation, `llvm-link -S`
+seems to work ok:
 
 ```
 $ llvm-link -S -v goir1.bc
@@ -30,6 +32,8 @@ entry:
 
 ```
 
+## Executing the LLVM bitcode
+
 The generated bitcode can be run directly from the command
 line using `lli`, without needing to turn it into an executable.
 
@@ -45,8 +49,25 @@ The return code of 48 there is correct, as the bitcode in this
 playground example returns a value of 48 to the caller from its
 `main()`.
 
-To convert the bitcode to LLVM SSA form, `llc` seems to work
-ok:
+## Compiling the LLVM bitcode to an executable
+
+`clang` can directly compile the bitcode to a runnable
+executable:
+
+```
+$ clang -o goir1 goir1.bc
+warning: overriding the module target triple with x86_64-unknown-linux-gnu [-Woverride-module]
+1 warning generated.
+$ ls -la goir1
+-rwxrwxr-x. 1 jc jc 8288 May  6 21:28 goir1
+$ ./goir1
+$ echo $?
+48
+```
+
+## Converting the LLVM bitcode to SSA form
+
+To convert the bitcode to LLVM SSA form, `llc` seems to work ok:
 
 ```
 $ llc goir1.bc
