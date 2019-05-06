@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -37,6 +38,24 @@ func main() {
 
 	// Return
 	builder.CreateRet(result)
+
+	// Verify the module is correct
+	if ok := llvm.VerifyModule(mod, llvm.ReturnStatusAction); ok != nil {
+		log.Fatal(ok)
+	}
+
+	// Write the IR for the module (text format) to stdout
+	//mod.Dump()
+
+	// Compile and run the function
+	engine, err := llvm.NewExecutionEngine(mod)
+	if err != nil {
+		log.Fatal(err)
+	}
+	funcResult := engine.RunFunction(mod.NamedFunction("main"), []llvm.GenericValue{})
+
+	// Display the result of the function
+	fmt.Printf("%d\n", funcResult.Int(false))
 
 	// Write out the IR as bitcode
 	outFile, err := os.Create("goir1.bc")
