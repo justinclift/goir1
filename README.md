@@ -109,7 +109,7 @@ $ ls -la goir1.wasm
 ```
 
 ```
-$ wasm2wat --generate-names goir1.wasm
+$ wasm2wat -f --generate-names goir1.wasm
 (module
   (type $t0 (func (result i32)))
   (type $t1 (func (param i32 i32) (result i32)))
@@ -118,40 +118,40 @@ $ wasm2wat --generate-names goir1.wasm
   (import "env" "__stack_pointer" (global $env.__stack_pointer (mut i32)))
   (func $f0 (type $t0) (result i32)
     (local $l0 i32) (local $l1 i32) (local $l2 i32) (local $l3 i32) (local $l4 i32) (local $l5 i32) (local $l6 i32) (local $l7 i32)
-    global.get $env.__stack_pointer
-    local.set $l0
-    i32.const 16
-    local.set $l1
-    local.get $l0
-    local.get $l1
-    i32.sub
-    local.set $l2
-    i32.const 16
-    local.set $l3
-    i32.const 32
-    local.set $l4
-    local.get $l2
-    local.get $l4
-    i32.store offset=12
-    local.get $l2
-    local.get $l3
-    i32.store offset=8
-    local.get $l2
-    i32.load offset=12
-    local.set $l5
-    local.get $l2
-    i32.load offset=8
-    local.set $l6
-    local.get $l5
-    local.get $l6
-    i32.add
-    local.set $l7
-    local.get $l7
-    return)
+    (local.set $l0
+      (global.get $env.__stack_pointer))
+    (local.set $l1
+      (i32.const 16))
+    (local.set $l2
+      (i32.sub
+        (local.get $l0)
+        (local.get $l1)))
+    (local.set $l3
+      (i32.const 16))
+    (local.set $l4
+      (i32.const 32))
+    (i32.store offset=12
+      (local.get $l2)
+      (local.get $l4))
+    (i32.store offset=8
+      (local.get $l2)
+      (local.get $l3))
+    (local.set $l5
+      (i32.load offset=12
+        (local.get $l2)))
+    (local.set $l6
+      (i32.load offset=8
+        (local.get $l2)))
+    (local.set $l7
+      (i32.add
+        (local.get $l5)
+        (local.get $l6)))
+    (return
+      (local.get $l7)))
   (func $f1 (type $t1) (param $p0 i32) (param $p1 i32) (result i32)
     (local $l2 i32)
-    call $f0
-    local.set $l2
-    local.get $l2
-    return))
+    (local.set $l2
+      (call $f0))
+    (return
+      (local.get $l2))))
 ```
