@@ -40,19 +40,26 @@ func main() {
 	llvm.AddFunction(mod, "main", i32NoParams)
 
 	// Create a basic block
-	block := ctx.AddBasicBlock(mod.NamedFunction("main"), "entry")
+	block := ctx.AddBasicBlock(mod.NamedFunction("main"), "")
 
 	// Set the instruction insert point
 	builder.SetInsertPoint(block, block.FirstInstruction())
 
 	// Add the "hello world" string
-	builder.CreateGlobalString("hello world\n", ".str")
-	//str := builder.CreateGlobalString("hello world\n", ".str")
+	str := builder.CreateGlobalString("hello world\n", ".str")
 
-	// TODO: Add the puts call
+	// TODO: Call the puts function
+	foo := builder.CreateAlloca(puts1, "cast210")
+	strPtr := builder.CreatePointerCast(str, puts1, "stuff")
+	builder.CreateStore(strPtr, foo)
 
+	bar := builder.CreateLoad(foo, "")
 
-	// Return 0
+	builder.CreateCall(mod.NamedFunction("puts"), []llvm.Value{bar}, "")
+	//builder.CreateCall(mod.NamedFunction("puts"), []llvm.Value{foo}, "")
+	//builder.CreateCall(mod.NamedFunction("puts"), []llvm.Value{}, "")
+
+	// Return 0 from the main function
 	builder.CreateRet(llvm.ConstInt(ctx.Int32Type(), 0, false))
 
 	// Verify the module is correct
