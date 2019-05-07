@@ -22,9 +22,7 @@ func main() {
 		attrKind := llvm.AttributeKindID(attrName)
 		return ctx.CreateEnumAttribute(attrKind, 0)
 	}
-	_ = getAttr("nocapture")
-	//nocapture := getAttr("nocapture")
-	//fmt.Printf("%v\n", nocapture)
+	nocapture := getAttr("nocapture")
 
 	// Declare a type that returns an int32, and takes no parameters
 	i32NoParams := llvm.FunctionType(ctx.Int32Type(), []llvm.Type{}, false)
@@ -37,9 +35,9 @@ func main() {
 	llvm.AddFunction(mod, "main", i32NoParams)
 
 	// Add a global for the external puts() function
-	llvm.AddGlobal(mod, putsType, "puts")
-	//mod.NamedFunction("puts").AddAttributeAtIndex(0, nocapture)
-	//putsGlobal := llvm.AddGlobal(mod, putsType, "puts")
+	llvm.AddFunction(mod, "puts", putsType)
+	mod.NamedFunction("puts").AddAttributeAtIndex(1, nocapture)
+	//mod.NamedFunction("puts").AddFunctionAttr(getAttr("nounwind"))
 
 	// Create a basic block
 	block := ctx.AddBasicBlock(mod.NamedFunction("main"), "entry")
