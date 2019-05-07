@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -31,7 +30,6 @@ func main() {
 	// Add a global for the external puts() function
 	llvm.AddFunction(mod, "puts", putsType)
 	mod.NamedFunction("puts").AddAttributeAtIndex(1, nocapture)
-	//mod.NamedFunction("puts").AddFunctionAttr(getAttr("nounwind"))
 
 	// Declare a type that returns an int32, and takes no parameters
 	i32NoParams := llvm.FunctionType(ctx.Int32Type(), []llvm.Type{}, false)
@@ -44,15 +42,11 @@ func main() {
 	builder.SetInsertPointAtEnd(block)
 
 	// Add the "hello world" string
-	//builder.CreateGlobalString("hello world\n", ".str")
 	str := builder.CreateGlobalString("hello world\n", ".str")
 
-	// TODO: Call the puts function
-	foo := builder.CreateAlloca(ctx.Int8Type(), "cast210")
-	strPtr := builder.CreatePointerCast(str, ctx.Int8Type(), "")
-	builder.CreateStore(strPtr, foo)
-
-	builder.CreateCall(mod.NamedFunction("puts"), []llvm.Value{foo}, "")
+	// Call the puts function
+	strPtr := builder.CreatePointerCast(str, puts1, "")
+	builder.CreateCall(mod.NamedFunction("puts"), []llvm.Value{strPtr}, "")
 
 	// Return 0 from the main function
 	builder.CreateRet(llvm.ConstInt(ctx.Int32Type(), 0, false))
@@ -66,14 +60,14 @@ func main() {
 	mod.Dump()
 
 	// Compile and run the function
-	engine, err := llvm.NewExecutionEngine(mod)
-	if err != nil {
-		log.Fatal(err)
-	}
-	funcResult := engine.RunFunction(mod.NamedFunction("main"), []llvm.GenericValue{})
+	//engine, err := llvm.NewExecutionEngine(mod)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//funcResult := engine.RunFunction(mod.NamedFunction("main"), []llvm.GenericValue{})
 
 	// Display the result of the function
-	fmt.Printf("%d\n", funcResult.Int(false))
+	//fmt.Printf("%d\n", funcResult.Int(false))
 
 	// Write out the IR as bitcode
 	outFile, err := os.Create("goir1.bc")
