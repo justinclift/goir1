@@ -20,14 +20,11 @@ func main() {
 	// Declare a type that returns an int32, and takes no parameters
 	i32NoParams := llvm.FunctionType(llvm.Int32Type(), []llvm.Type{}, false)
 
+	// Define the function type for the extern "puts" function
+	putsType := llvm.FunctionType(llvm.Int32Type(), []llvm.Type{llvm.PointerType(llvm.Int8Type(), 0)}, false)
 
 	// Declare a type that returns a double, and takes no parameters
 	//DoubleNoParams := llvm.FunctionType(llvm.DoubleType(), []llvm.Type{}, false)
-
-	//stuffString := llvm.ConstString("stuff", false)
-	//builder.CreateGlobalStringPtr("stuff", "mystuff")
-	//stuffString := builder.CreateGlobalStringPtr("stuff", "mystuff")
-
 
 	// Create a function called "main"
 	llvm.AddFunction(mod, "main", i32NoParams)
@@ -35,24 +32,14 @@ func main() {
 	//llvm.ExternalLinkage
 
 	// Declare a type that returns a double, and takes 1 double as a parameter
-	doubleDouble := llvm.FunctionType(llvm.DoubleType(), []llvm.Type{llvm.DoubleType()}, false)
+	//doubleDouble := llvm.FunctionType(llvm.DoubleType(), []llvm.Type{llvm.DoubleType()}, false)
 
 	// Import a global.  Trying with the external cos() function for now
-	llvm.AddGlobal(mod, doubleDouble, "cos")
+	//llvm.AddGlobal(mod, doubleDouble, "cos")
 	//cos := llvm.AddGlobal(mod, uInt32NoParams, "cos")
 
-	// Import a global.  Trying with the external puts() function for now
-	llvm.AddGlobal(mod, i32NoParams, "puts")
-
-
-	llvm.AddGlobal(mod, llvm.Int32Type(), "mystuff")
-
-	//llvm.AddGlobal(mod, stuffString, "foo")
-
-	//llvm.New
-
-	//llvm.
-
+	// Add a global for the external puts() function
+	llvm.AddGlobal(mod, putsType, "puts")
 
 	// Create a basic block
 	block := llvm.AddBasicBlock(mod.NamedFunction("main"), "entry")
@@ -62,7 +49,6 @@ func main() {
 
 	// Add "hello world" string
 	builder.CreateGlobalString("hello world\x0A", ".str")
-
 
 	// int a = 32
 	a := builder.CreateAlloca(llvm.Int32Type(), "a")
