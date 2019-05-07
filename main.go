@@ -39,11 +39,9 @@ func main() {
 	// Create a function called "main"
 	llvm.AddFunction(mod, "main", i32NoParams)
 
-	// Create a basic block
+	// Create a basic block and set the instruction insert point
 	block := ctx.AddBasicBlock(mod.NamedFunction("main"), "")
-
-	// Set the instruction insert point
-	builder.SetInsertPoint(block, block.FirstInstruction())
+	builder.SetInsertPointAtEnd(block)
 
 	// Add the "hello world" string
 	//builder.CreateGlobalString("hello world\n", ".str")
