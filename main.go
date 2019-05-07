@@ -24,20 +24,20 @@ func main() {
 	}
 	nocapture := getAttr("nocapture")
 
-	// Declare a type that returns an int32, and takes no parameters
-	i32NoParams := llvm.FunctionType(ctx.Int32Type(), []llvm.Type{}, false)
-
 	// Define the function type for the extern "puts" function
 	puts1 := llvm.PointerType(ctx.Int8Type(), 0)
 	putsType := llvm.FunctionType(ctx.Int32Type(), []llvm.Type{puts1}, false)
-
-	// Create a function called "main"
-	llvm.AddFunction(mod, "main", i32NoParams)
 
 	// Add a global for the external puts() function
 	llvm.AddFunction(mod, "puts", putsType)
 	mod.NamedFunction("puts").AddAttributeAtIndex(1, nocapture)
 	//mod.NamedFunction("puts").AddFunctionAttr(getAttr("nounwind"))
+
+	// Declare a type that returns an int32, and takes no parameters
+	i32NoParams := llvm.FunctionType(ctx.Int32Type(), []llvm.Type{}, false)
+
+	// Create a function called "main"
+	llvm.AddFunction(mod, "main", i32NoParams)
 
 	// Create a basic block
 	block := ctx.AddBasicBlock(mod.NamedFunction("main"), "entry")
