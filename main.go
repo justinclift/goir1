@@ -46,18 +46,15 @@ func main() {
 	builder.SetInsertPoint(block, block.FirstInstruction())
 
 	// Add the "hello world" string
+	//builder.CreateGlobalString("hello world\n", ".str")
 	str := builder.CreateGlobalString("hello world\n", ".str")
 
 	// TODO: Call the puts function
-	foo := builder.CreateAlloca(puts1, "cast210")
-	strPtr := builder.CreatePointerCast(str, puts1, "stuff")
+	foo := builder.CreateAlloca(ctx.Int8Type(), "cast210")
+	strPtr := builder.CreatePointerCast(str, ctx.Int8Type(), "")
 	builder.CreateStore(strPtr, foo)
 
-	bar := builder.CreateLoad(foo, "")
-
-	builder.CreateCall(mod.NamedFunction("puts"), []llvm.Value{bar}, "")
-	//builder.CreateCall(mod.NamedFunction("puts"), []llvm.Value{foo}, "")
-	//builder.CreateCall(mod.NamedFunction("puts"), []llvm.Value{}, "")
+	builder.CreateCall(mod.NamedFunction("puts"), []llvm.Value{foo}, "")
 
 	// Return 0 from the main function
 	builder.CreateRet(llvm.ConstInt(ctx.Int32Type(), 0, false))
