@@ -47,16 +47,13 @@ func main() {
 
 	// Add the "hello world" string
 	builder.CreateGlobalString("hello world\n", ".str")
+	//str := builder.CreateGlobalString("hello world\n", ".str")
 
 	// TODO: Add the puts call
 
 
-
 	// Return 0
-	rtnVal := builder.CreateAlloca(ctx.Int32Type(), "rtnVal")
-	builder.CreateStore(llvm.ConstInt(ctx.Int32Type(), 0, false), rtnVal) // Probably not needed
-	returnPtr := builder.CreateLoad(rtnVal, "rtnPtr")
-	builder.CreateRet(returnPtr)
+	builder.CreateRet(llvm.ConstInt(ctx.Int32Type(), 0, false))
 
 	// Verify the module is correct
 	if ok := llvm.VerifyModule(mod, llvm.ReturnStatusAction); ok != nil {
