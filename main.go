@@ -48,7 +48,7 @@ func main() {
 	builder.SetInsertPoint(block, block.FirstInstruction())
 
 	// Add "hello world" string
-	builder.CreateGlobalString("hello world\x0A", ".str")
+	builder.CreateGlobalString("hello world\n", ".str")
 
 	// int a = 32
 	a := builder.CreateAlloca(llvm.Int32Type(), "a")
