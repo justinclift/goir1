@@ -37,11 +37,13 @@ fmt.Printf("%v\n", nocapture)
 
 	// Add a global for the external puts() function
 	llvm.AddGlobal(mod, putsType, "puts")
+	//mod.NamedFunction("puts").AddAttributeAtIndex(0, nocapture)
 	//putsGlobal := llvm.AddGlobal(mod, putsType, "puts")
-	//putsGlobal.AddAttributeAtIndex(1, nocapture)
+	//putsGlobal.AddAttributeAtIndex(0, nocapture)
+
 
 	// Create a basic block
-	block := llvm.AddBasicBlock(mod.NamedFunction("main"), "entry")
+	block := ctx.AddBasicBlock(mod.NamedFunction("main"), "entry")
 
 	// Set the instruction insert point
 	builder.SetInsertPoint(block, block.FirstInstruction())
