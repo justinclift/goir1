@@ -18,25 +18,51 @@ func main() {
 	mod := llvm.NewModule("my_module")
 
 	// Declare a type that returns an int32, and takes no parameters
-	int32NoParams := llvm.FunctionType(llvm.Int32Type(), []llvm.Type{}, false)
+	i32NoParams := llvm.FunctionType(llvm.Int32Type(), []llvm.Type{}, false)
+
+
+	// Declare a type that returns a double, and takes no parameters
+	//DoubleNoParams := llvm.FunctionType(llvm.DoubleType(), []llvm.Type{}, false)
+
+	//stuffString := llvm.ConstString("stuff", false)
+	//builder.CreateGlobalStringPtr("stuff", "mystuff")
+	//stuffString := builder.CreateGlobalStringPtr("stuff", "mystuff")
+
 
 	// Create a function called "main"
-	llvm.AddFunction(mod, "main", int32NoParams)
+	llvm.AddFunction(mod, "main", i32NoParams)
 
 	//llvm.ExternalLinkage
 
-	// Declare a type that returns a float, and takes 1 float as a parameter
-	floatFloat := llvm.FunctionType(llvm.FloatType(), []llvm.Type{llvm.FloatType()}, false)
+	// Declare a type that returns a double, and takes 1 double as a parameter
+	doubleDouble := llvm.FunctionType(llvm.DoubleType(), []llvm.Type{llvm.DoubleType()}, false)
 
 	// Import a global.  Trying with the external cos() function for now
-	llvm.AddGlobal(mod, floatFloat, "cos")
+	llvm.AddGlobal(mod, doubleDouble, "cos")
 	//cos := llvm.AddGlobal(mod, uInt32NoParams, "cos")
+
+	// Import a global.  Trying with the external puts() function for now
+	llvm.AddGlobal(mod, i32NoParams, "puts")
+
+
+	llvm.AddGlobal(mod, llvm.Int32Type(), "mystuff")
+
+	//llvm.AddGlobal(mod, stuffString, "foo")
+
+	//llvm.New
+
+	//llvm.
+
 
 	// Create a basic block
 	block := llvm.AddBasicBlock(mod.NamedFunction("main"), "entry")
 
 	// Set the instruction insert point
 	builder.SetInsertPoint(block, block.FirstInstruction())
+
+	// Add "hello world" string
+	builder.CreateGlobalString("hello world\x0A", ".str")
+
 
 	// int a = 32
 	a := builder.CreateAlloca(llvm.Int32Type(), "a")
@@ -49,7 +75,17 @@ func main() {
 	// a + b
 	aVal := builder.CreateLoad(a, "a_val")
 	bVal := builder.CreateLoad(b, "b_val")
+
+	// cos (a + b)
+	//c := builder.CreateAlloca(llvm.DoubleType(), "cosresult")
+	//c := builder.CreateAdd(aVal, bVal, "ab_value")
 	result := builder.CreateAdd(aVal, bVal, "ab_value")
+
+	//foo := llvm.UIToFP
+	builder.CreateUIToFP(result, llvm.DoubleType(), "convertint")
+	//c := builder.CreateUIToFP(result, llvm.DoubleType(), "convertint")
+
+	//result := builder.
 
 	// Return
 	builder.CreateRet(result)
