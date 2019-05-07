@@ -8,14 +8,29 @@ import (
 	"github.com/aykevl/go-llvm"
 )
 
+const (
+	PAGESIZE = 65536
+)
+
 func main() {
 	// Create a LLVM IR builder
 	builder := llvm.NewBuilder()
 	mod := llvm.NewModule("my_module")
 
+	// Declare a type that returns an int32, and takes no parameters
+	int32NoParams := llvm.FunctionType(llvm.Int32Type(), []llvm.Type{}, false)
+
 	// Create a function called "main"
-	main := llvm.FunctionType(llvm.Int32Type(), []llvm.Type{}, false)
-	llvm.AddFunction(mod, "main", main)
+	llvm.AddFunction(mod, "main", int32NoParams)
+
+	//llvm.ExternalLinkage
+
+	// Declare a type that returns a float, and takes 1 float as a parameter
+	floatFloat := llvm.FunctionType(llvm.FloatType(), []llvm.Type{llvm.FloatType()}, false)
+
+	// Import a global.  Trying with the external cos() function for now
+	llvm.AddGlobal(mod, floatFloat, "cos")
+	//cos := llvm.AddGlobal(mod, uInt32NoParams, "cos")
 
 	// Create a basic block
 	block := llvm.AddBasicBlock(mod.NamedFunction("main"), "entry")
@@ -45,7 +60,7 @@ func main() {
 	}
 
 	// Write the IR for the module (text format) to stdout
-	//mod.Dump()
+	mod.Dump()
 
 	// Compile and run the function
 	engine, err := llvm.NewExecutionEngine(mod)
