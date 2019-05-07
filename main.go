@@ -8,38 +8,37 @@ import (
 	"github.com/aykevl/go-llvm"
 )
 
-const (
-	PAGESIZE = 65536
-)
-
 func main() {
+	// Create an overall context
+	ctx := llvm.NewContext()
+
 	// Create a LLVM IR builder
-	builder := llvm.NewBuilder()
-	mod := llvm.NewModule("my_module")
+	mod := ctx.NewModule("my_module")
+	builder := ctx.NewBuilder()
+
+	// Create the "nocapture" attribute
+	// From: https://github.com/tinygo-org/tinygo/blob/fa5df4f524c3b4f15360c2da964932692e3ab4af/compiler/compiler.go#L374-L378
+	getAttr := func(attrName string) llvm.Attribute {
+		attrKind := llvm.AttributeKindID(attrName)
+		return ctx.CreateEnumAttribute(attrKind, 0)
+	}
+	nocapture := getAttr("nocapture")
+fmt.Printf("%v\n", nocapture)
 
 	// Declare a type that returns an int32, and takes no parameters
-	i32NoParams := llvm.FunctionType(llvm.Int32Type(), []llvm.Type{}, false)
+	i32NoParams := llvm.FunctionType(ctx.Int32Type(), []llvm.Type{}, false)
 
 	// Define the function type for the extern "puts" function
-	putsType := llvm.FunctionType(llvm.Int32Type(), []llvm.Type{llvm.PointerType(llvm.Int8Type(), 0)}, false)
-
-	// Declare a type that returns a double, and takes no parameters
-	//DoubleNoParams := llvm.FunctionType(llvm.DoubleType(), []llvm.Type{}, false)
+	puts1 := llvm.PointerType(ctx.Int8Type(), 0)
+	putsType := llvm.FunctionType(ctx.Int32Type(), []llvm.Type{puts1}, false)
 
 	// Create a function called "main"
 	llvm.AddFunction(mod, "main", i32NoParams)
 
-	//llvm.ExternalLinkage
-
-	// Declare a type that returns a double, and takes 1 double as a parameter
-	//doubleDouble := llvm.FunctionType(llvm.DoubleType(), []llvm.Type{llvm.DoubleType()}, false)
-
-	// Import a global.  Trying with the external cos() function for now
-	//llvm.AddGlobal(mod, doubleDouble, "cos")
-	//cos := llvm.AddGlobal(mod, uInt32NoParams, "cos")
-
 	// Add a global for the external puts() function
 	llvm.AddGlobal(mod, putsType, "puts")
+	//putsGlobal := llvm.AddGlobal(mod, putsType, "puts")
+	//putsGlobal.AddAttributeAtIndex(1, nocapture)
 
 	// Create a basic block
 	block := llvm.AddBasicBlock(mod.NamedFunction("main"), "entry")
@@ -51,27 +50,17 @@ func main() {
 	builder.CreateGlobalString("hello world\n", ".str")
 
 	// int a = 32
-	a := builder.CreateAlloca(llvm.Int32Type(), "a")
-	builder.CreateStore(llvm.ConstInt(llvm.Int32Type(), 32, false), a)
+	a := builder.CreateAlloca(ctx.Int32Type(), "a")
+	builder.CreateStore(llvm.ConstInt(ctx.Int32Type(), 32, false), a)
 
 	// int b = 16
-	b := builder.CreateAlloca(llvm.Int32Type(), "b")
-	builder.CreateStore(llvm.ConstInt(llvm.Int32Type(), 16, false), b)
+	b := builder.CreateAlloca(ctx.Int32Type(), "b")
+	builder.CreateStore(llvm.ConstInt(ctx.Int32Type(), 16, false), b)
 
 	// a + b
 	aVal := builder.CreateLoad(a, "a_val")
 	bVal := builder.CreateLoad(b, "b_val")
-
-	// cos (a + b)
-	//c := builder.CreateAlloca(llvm.DoubleType(), "cosresult")
-	//c := builder.CreateAdd(aVal, bVal, "ab_value")
 	result := builder.CreateAdd(aVal, bVal, "ab_value")
-
-	//foo := llvm.UIToFP
-	builder.CreateUIToFP(result, llvm.DoubleType(), "convertint")
-	//c := builder.CreateUIToFP(result, llvm.DoubleType(), "convertint")
-
-	//result := builder.
 
 	// Return
 	builder.CreateRet(result)
