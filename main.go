@@ -12,8 +12,8 @@ func main() {
 	// Create an overall context
 	ctx := llvm.NewContext()
 
-	// Create a LLVM IR builder
-	mod := ctx.NewModule("my_module")
+	// Create an LLVM IR builder
+	mod := ctx.NewModule("")
 	builder := ctx.NewBuilder()
 
 	// Create the "nocapture" attribute
@@ -22,8 +22,9 @@ func main() {
 		attrKind := llvm.AttributeKindID(attrName)
 		return ctx.CreateEnumAttribute(attrKind, 0)
 	}
-	nocapture := getAttr("nocapture")
-fmt.Printf("%v\n", nocapture)
+	_ = getAttr("nocapture")
+	//nocapture := getAttr("nocapture")
+	//fmt.Printf("%v\n", nocapture)
 
 	// Declare a type that returns an int32, and takes no parameters
 	i32NoParams := llvm.FunctionType(ctx.Int32Type(), []llvm.Type{}, false)
@@ -39,8 +40,6 @@ fmt.Printf("%v\n", nocapture)
 	llvm.AddGlobal(mod, putsType, "puts")
 	//mod.NamedFunction("puts").AddAttributeAtIndex(0, nocapture)
 	//putsGlobal := llvm.AddGlobal(mod, putsType, "puts")
-	//putsGlobal.AddAttributeAtIndex(0, nocapture)
-
 
 	// Create a basic block
 	block := ctx.AddBasicBlock(mod.NamedFunction("main"), "entry")
@@ -48,24 +47,18 @@ fmt.Printf("%v\n", nocapture)
 	// Set the instruction insert point
 	builder.SetInsertPoint(block, block.FirstInstruction())
 
-	// Add "hello world" string
+	// Add the "hello world" string
 	builder.CreateGlobalString("hello world\n", ".str")
 
-	// int a = 32
-	a := builder.CreateAlloca(ctx.Int32Type(), "a")
-	builder.CreateStore(llvm.ConstInt(ctx.Int32Type(), 32, false), a)
+	// TODO: Add the puts call
 
-	// int b = 16
-	b := builder.CreateAlloca(ctx.Int32Type(), "b")
-	builder.CreateStore(llvm.ConstInt(ctx.Int32Type(), 16, false), b)
 
-	// a + b
-	aVal := builder.CreateLoad(a, "a_val")
-	bVal := builder.CreateLoad(b, "b_val")
-	result := builder.CreateAdd(aVal, bVal, "ab_value")
 
-	// Return
-	builder.CreateRet(result)
+	// Return 0
+	rtnVal := builder.CreateAlloca(ctx.Int32Type(), "rtnVal")
+	builder.CreateStore(llvm.ConstInt(ctx.Int32Type(), 0, false), rtnVal) // Probably not needed
+	returnPtr := builder.CreateLoad(rtnVal, "rtnPtr")
+	builder.CreateRet(returnPtr)
 
 	// Verify the module is correct
 	if ok := llvm.VerifyModule(mod, llvm.ReturnStatusAction); ok != nil {
