@@ -13,12 +13,31 @@ var (
 	mod     llvm.Module
 )
 
+func init() {
+	llvm.InitializeAllTargets()
+	llvm.InitializeAllTargetMCs()
+	llvm.InitializeAllTargetInfos()
+	llvm.InitializeAllAsmParsers()
+	llvm.InitializeAllAsmPrinters()
+}
+
 func main() {
+	// Set up target machine
+	cfg := llvm.DefaultTargetTriple()
+	tgt, err := llvm.GetTargetFromTriple(cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+	machine := tgt.CreateTargetMachine(cfg, "generic", "", llvm.CodeGenLevelDefault, llvm.RelocStatic, llvm.CodeModelDefault)
+	targetData := machine.CreateTargetData()
+
 	// Create an overall context
 	ctx = llvm.NewContext()
 
 	// Create an LLVM IR builder
 	mod = ctx.NewModule("")
+	mod.SetTarget(cfg)
+	mod.SetDataLayout(targetData.String())
 	builder = ctx.NewBuilder()
 
 	// Create the "nocapture" attribute
@@ -62,18 +81,9 @@ func main() {
 	// Write the IR for the module (text format) to stdout
 	mod.Dump()
 
-	// Compile and run the function
-	//engine, err := llvm.NewExecutionEngine(mod)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//funcResult := engine.RunFunction(mod.NamedFunction("main"), []llvm.GenericValue{})
-
-	// Display the result of the function
-	//fmt.Printf("%d\n", funcResult.Int(false))
-
 	// Write out the IR as bitcode
-	outFile, err := os.Create("goir1.bc")
+	fName := "goir1.bc"
+	outFile, err := os.Create(fName)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -81,6 +91,19 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Println("********")
+	log.Printf("Bitcode written to %s\n", fName)
+
+	// Compile and run the function
+	engine, err := llvm.NewExecutionEngine(mod)
+	if err != nil {
+		log.Fatal(err)
+	}
+	funcResult := engine.RunFunction(mod.NamedFunction("main"), []llvm.GenericValue{})
+
+	// Display the result of the function
+	log.Printf("Program compiled and executed, returning exit code: %d\n", funcResult.Int(false))
+	log.Println("********")
 }
 
 func printString(text string) {
