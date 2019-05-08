@@ -46,7 +46,7 @@ func main() {
 
 	// Call the puts function
 	strPtr := builder.CreatePointerCast(str, puts1, "")
-	builder.CreateCall(mod.NamedFunction("puts"), []llvm.Value{strPtr}, "")
+	builder.CreateCall(mod.NamedFunction("puts"), []llvm.Value{strPtr}, "cast210")
 
 	// Return 0 from the main function
 	builder.CreateRet(llvm.ConstInt(ctx.Int32Type(), 0, false))
