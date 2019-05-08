@@ -7,13 +7,19 @@ import (
 	"github.com/aykevl/go-llvm"
 )
 
+var (
+	builder llvm.Builder
+	ctx     llvm.Context
+	mod     llvm.Module
+)
+
 func main() {
 	// Create an overall context
-	ctx := llvm.NewContext()
+	ctx = llvm.NewContext()
 
 	// Create an LLVM IR builder
-	mod := ctx.NewModule("")
-	builder := ctx.NewBuilder()
+	mod = ctx.NewModule("")
+	builder = ctx.NewBuilder()
 
 	// Create the "nocapture" attribute
 	// From: https://github.com/tinygo-org/tinygo/blob/fa5df4f524c3b4f15360c2da964932692e3ab4af/compiler/compiler.go#L374-L378
@@ -41,12 +47,9 @@ func main() {
 	block := ctx.AddBasicBlock(mod.NamedFunction("main"), "")
 	builder.SetInsertPointAtEnd(block)
 
-	// Add the "hello world" string
-	str := builder.CreateGlobalString("hello world\n", ".str")
-
-	// Call the puts function
-	strPtr := builder.CreatePointerCast(str, puts1, "")
-	builder.CreateCall(mod.NamedFunction("puts"), []llvm.Value{strPtr}, "cast210")
+	// Print "hello world" strings
+	printString("hello world")
+	printString("hello world2")
 
 	// Return 0 from the main function
 	builder.CreateRet(llvm.ConstInt(ctx.Int32Type(), 0, false))
@@ -78,4 +81,13 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func printString(text string) {
+	// Add the string
+	str := builder.CreateGlobalString(text, "")
+
+	// Call the external puts function
+	strPtr := builder.CreatePointerCast(str, llvm.PointerType(ctx.Int8Type(), 0), "")
+	builder.CreateCall(mod.NamedFunction("puts"), []llvm.Value{strPtr}, "")
 }
