@@ -7,29 +7,13 @@ When this runs, it generates an LLVM IR bitcode file `goir1.bc`.
 
 ## Displaying the text representation of IR
 
-To convert LLVM bitcode to a text representation, `llvm-link -S`
-seems to work ok:
+To convert LLVM bitcode to a text representation, use `llvm-dis`:
 
 ```
-$ llvm-link -S -v goir1.bc
-Loading 'goir1.bc'
-Linking in 'goir1.bc'
-Writing bitcode...
-; ModuleID = 'llvm-link'
-source_filename = "llvm-link"
-
-define i32 @main() {
-entry:
-  %a = alloca i32
-  store i32 32, i32* %a
-  %b = alloca i32
-  store i32 16, i32* %b
-  %a_val = load i32, i32* %a
-  %b_val = load i32, i32* %b
-  %ab_value = add i32 %a_val, %b_val
-  ret i32 %ab_value
-}
-
+$ llvm-dis goir1.bc
+$ ls -la goir1.*
+-rw-rw-r--. 1 jc jc  7392 Jun 11 19:19 goir1.bc
+-rw-rw-r--. 1 jc jc 20381 Jun 11 19:19 goir1.ll
 ```
 
 ## Executing the LLVM bitcode
